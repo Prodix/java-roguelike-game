@@ -1,6 +1,7 @@
 package com.syndicate.berserktheriseofevil;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
@@ -11,6 +12,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
+import java.util.Arrays;
 
 
 public class TextButton {
@@ -31,9 +34,10 @@ public class TextButton {
     private float cursorDelta;
     private Camera camera;
     private Viewport viewport;
-    private boolean isHand = false;
+    private Screen parent;
+    public boolean isHovered = false;
 
-    public TextButton(String text, SpriteBatch batch, BitmapFont font, Camera camera, Viewport viewport) {
+    public TextButton(Screen parent, String text, SpriteBatch batch, BitmapFont font, Camera camera, Viewport viewport) {
         this.text = text;
         this.batch = batch;
         this.font = font;
@@ -41,9 +45,10 @@ public class TextButton {
         area = new com.badlogic.gdx.math.Rectangle();
         this.camera = camera;
         this.viewport = viewport;
+        this.parent = parent;
     }
 
-    public TextButton(String text, Texture icon, SpriteBatch batch, BitmapFont font, Camera camera, Viewport viewport) {
+    public TextButton(Screen parent, String text, Texture icon, SpriteBatch batch, BitmapFont font, Camera camera, Viewport viewport) {
         this.text = text;
         this.icon = icon;
         this.batch = batch;
@@ -52,6 +57,7 @@ public class TextButton {
         area = new com.badlogic.gdx.math.Rectangle();
         this.camera = camera;
         this.viewport = viewport;
+        this.parent = parent;
     }
 
     public GlyphLayout getTextMeasurement() {
@@ -110,25 +116,34 @@ public class TextButton {
                 return;
             }
 
-            recalculateArea(x, y);
             if (isFade && transitionAlpha < 1f) {
-                font.setColor(font.getColor().r,font.getColor().g,font.getColor().b, transitionAlpha);
+                font.setColor(255,255,255, transitionAlpha);
                 batch.setColor(batch.getColor().r, batch.getColor().g, batch.getColor().b, transitionAlpha);
             }
 
+            if (area.width == 0 || area.height == 0)
+                recalculateArea(x, y);
+
             if (transitionAlpha >= 1f) {
                 if (checkHover()) {
-                    if (!isHand) {
-                        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
-                        isHand = true;
-                    }
+                    isHovered = true;
                     font.setColor(hoverColor.r, hoverColor.g, hoverColor.b, 1f);
                 } else {
-                    Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
-                    isHand = false;
+                    isHovered = false;
                     font.setColor(Color.WHITE);
                 }
             }
+
+            if (isHovered || Arrays.stream(parent.getClass().getDeclaredFields()).filter(field -> field.getType() == TextButton.class).anyMatch(field -> {
+                try {
+                    return ((TextButton) field.get(parent)).isHovered;
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }))
+                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
+            else
+                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
 
             font.draw(batch, text, x, y);
 

@@ -26,9 +26,9 @@ public class MainMenuScreen implements Screen {
 
     private float alpha = 0f;
     private float textTranslation = 0;
-    private TextButton singlePlayButton;
-    private TextButton coopPlayButton;
-    private TextButton exitButton;
+    public TextButton singlePlayButton;
+    public TextButton coopPlayButton;
+    public TextButton exitButton;
 
     public MainMenuScreen(final BerserkGame game) {
         this.game = game;
@@ -44,10 +44,10 @@ public class MainMenuScreen implements Screen {
         camera.setToOrtho(false, Commons.WINDOW_WIDTH, Commons.WINDOW_HEIGHT);
         viewport = new ExtendViewport(Commons.WINDOW_WIDTH, Commons.WINDOW_HEIGHT, camera);
 
-        singlePlayButton = new TextButton("Single play", new Texture(Gdx.files.internal("sword-one.png")), game.batch, game.font96, camera, viewport);
-        coopPlayButton = new TextButton("Co-op play", new Texture(Gdx.files.internal("sword-two.png")), game.batch, game.font96, camera, viewport);
+        singlePlayButton = new TextButton(this, "Single play", new Texture(Gdx.files.internal("sword-one.png")), game.batch, game.font96, camera, viewport);
+        coopPlayButton = new TextButton(this, "Co-op play", new Texture(Gdx.files.internal("sword-two.png")), game.batch, game.font96, camera, viewport);
         coopPlayButton.setTransitionDelay(2f);
-        exitButton = new TextButton("Exit", game.batch, game.font96, camera, viewport);
+        exitButton = new TextButton(this, "Exit", game.batch, game.font96, camera, viewport);
         exitButton.setTransitionDelay(3f);
     }
 
@@ -63,9 +63,6 @@ public class MainMenuScreen implements Screen {
 
         game.batch.setProjectionMatrix(camera.combined);
         game.shapeRenderer.setProjectionMatrix(camera.combined);
-
-
-
 
         game.batch.begin();
 
